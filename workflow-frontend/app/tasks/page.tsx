@@ -68,8 +68,8 @@ export default function TasksPage() {
     .sort((a, b) => {
       if (sortBy === "deadline") {
         return sortOrder === "asc"
-          ? new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-          : new Date(b.due_date).getTime() - new Date(a.due_date).getTime()
+          ? new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime()
+          : new Date(b.due_date || 0).getTime() - new Date(a.due_date || 0).getTime()
       } else if (sortBy === "priority") {
         const priorityOrder = { high: 3, medium: 2, low: 1 }
         return sortOrder === "asc"
