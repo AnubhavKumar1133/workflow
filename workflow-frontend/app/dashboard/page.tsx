@@ -119,11 +119,11 @@ export default function DashboardPage() {
 
           {/* Buttons in a second row (stacked on mobile, horizontal on larger screens) */}
           <div className="flex gap-2">
-            <Link href="/tasks/new">
-              <Button>Create New Task</Button>
+            <Link href="/tasks">
+              <Button>All Tasks</Button>
             </Link>
-            <Link href="/clients/new">
-              <Button>Create Client</Button>
+            <Link href="/clients">
+              <Button>All Clients</Button>
             </Link>
           </div>
         </div>
