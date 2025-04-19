@@ -115,9 +115,14 @@ export default function DashboardPage() {
       <main className="flex-1 space-y-4 p-4 md:p-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <Link href="/tasks/new">
-            <Button>Create New Task</Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/tasks/new">
+              <Button>Create New Task</Button>
+            </Link>
+            <Link href="/clients/new">
+              <Button>Create Client</Button>
+            </Link>
+          </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
