@@ -24,10 +24,12 @@ interface Client {
   updatedAt: string
 }
 
-export default function ClientPage() {
-  const params = useParams()
-  const router = useRouter()
-  const id = params.id as string
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export default async function Page({ params }: PageProps) {
+  const { id } = await params
 
   const [client, setClient] = useState<Client | null>(null)
   const [editedClient, setEditedClient] = useState<Client | null>(null)
