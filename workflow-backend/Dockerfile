@@ -13,8 +13,9 @@ RUN npm install
 # 🔄 Copy the entire app now (this brings in your prisma folder too)
 COPY . .
 
-# ✅ Now Prisma schema is available
+# Now Prisma schema is available
 RUN npx prisma generate
+RUN npx prisma db push
 
 # Expose the app port
 EXPOSE 5000
