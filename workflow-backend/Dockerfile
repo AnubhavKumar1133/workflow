@@ -10,6 +10,10 @@ COPY package*.json .
 # Install the dependencies
 RUN npm install
 
+
+# Run Prisma client generation
+RUN npx prisma generate
+
 # Copy the rest of the application code into the container at /app
 COPY . .
 
