@@ -49,10 +49,10 @@ export default function Home() {
         <p className="text-xs text-gray-500 dark:text-gray-400">©This Website was built by ©Anubhav Kumar</p> 
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="https://in.linkedin.com/in/anubhav-kumar-b8129124b">
-            Github
+            LinkedIn
           </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="https://github.com/AnubhavKumar1133">
-            LinkedIn
+            Github
           </Link>
         </nav>
       </footer>

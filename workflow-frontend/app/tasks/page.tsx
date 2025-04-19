@@ -35,8 +35,8 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog"
-import { DialogTitle } from "@radix-ui/react-dialog"
 
 type Priority = "high" | "medium" | "low"
 
