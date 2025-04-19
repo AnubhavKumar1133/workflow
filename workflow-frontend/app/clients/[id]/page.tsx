@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,13 +23,12 @@ interface Client {
   createdAt: string
   updatedAt: string
 }
-interface ClientPageProps {
-  params: {
-    id: string;
-  };
-}
-export default function ClientPage({ params }:ClientPageProps) {
+
+export default function ClientPage() {
   const router = useRouter()
+  const params = useParams()
+  const id = params?.id as string
+
   const [client, setClient] = useState<Client | null>(null)
   const [editedClient, setEditedClient] = useState<Client | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -43,7 +42,7 @@ export default function ClientPage({ params }:ClientPageProps) {
       setIsLoading(true)
       setError(null)
       try {
-        const clientData = await fetchApi(`/api/clients/${params.id}`)
+        const clientData = await fetchApi(`/api/clients/${id}`)
         setClient(clientData)
         setEditedClient(clientData)
       } catch (err: any) {
@@ -53,8 +52,10 @@ export default function ClientPage({ params }:ClientPageProps) {
       }
     }
 
-    fetchClient()
-  }, [params.id])
+    if (id) {
+      fetchClient()
+    }
+  }, [id])
 
   const handleInputChange = (field: keyof Client, value: string) => {
     setEditedClient((prev) => ({
@@ -80,8 +81,8 @@ export default function ClientPage({ params }:ClientPageProps) {
       const updatedClient = await fetchApi(`/api/clients/${client?.id}`, {
         method: "PUT",
         headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: editedClient.name,
@@ -104,26 +105,26 @@ export default function ClientPage({ params }:ClientPageProps) {
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this client?")) {
-      return;
+      return
     }
-  
-    setIsDeleting(true);
-    setError(null);
-  
+
+    setIsDeleting(true)
+    setError(null)
+
     try {
       await fetchApi(`/api/clients/${client?.id}`, {
         method: "DELETE"
-      });
-      
-      router.push("/clients");
-      router.refresh();
+      })
+
+      router.push("/clients")
+      router.refresh()
     } catch (err: any) {
-      setError(err.message || "Failed to delete client");
-      console.error("Delete error:", err);
+      setError(err.message || "Failed to delete client")
+      console.error("Delete error:", err)
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  };
+  }
 
   if (isLoading) {
     return <div className="p-8 text-center">Loading...</div>
@@ -161,9 +162,7 @@ export default function ClientPage({ params }:ClientPageProps) {
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-2xl">{client.name}</CardTitle>
-                <CardDescription>
-                  Client details
-                </CardDescription>
+                <CardDescription>Client details</CardDescription>
               </div>
               <div className="flex space-x-2">
                 {!isEditing ? (
@@ -208,7 +207,6 @@ export default function ClientPage({ params }:ClientPageProps) {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Email</h3>
                     <div>{client.email || "Not specified"}</div>
                   </div>
-                  
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-2">Notes</h3>
