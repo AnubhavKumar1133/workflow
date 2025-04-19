@@ -23,8 +23,12 @@ interface Client {
   createdAt: string
   updatedAt: string
 }
-
-export default function ClientPage({ params }: { params: { id: string } }) {
+interface ClientPageProps {
+  params: {
+    id: string;
+  };
+}
+export default function ClientPage({ params }:ClientPageProps) {
   const router = useRouter()
   const [client, setClient] = useState<Client | null>(null)
   const [editedClient, setEditedClient] = useState<Client | null>(null)
