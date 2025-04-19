@@ -137,6 +137,11 @@ export default function ClientsPage() {
             </div>
           </CardContent>
         </Card>
+        <div className="text-center text-sm  mt-4">
+          <Link href="/dashboard" className="text-blue-500 hover:underline">
+            Go back to Dashboard
+          </Link>
+        </div>
       </main>
     </div>
   )
