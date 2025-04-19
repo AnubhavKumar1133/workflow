@@ -47,6 +47,10 @@ export default function DashboardPage() {
       setError(null)
 
       try {
+        if(!localStorage.getItem("token")){
+          router.push("/login")
+          return
+        }
         const stats = await fetchApi("/api/dashboard/stats",{
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
