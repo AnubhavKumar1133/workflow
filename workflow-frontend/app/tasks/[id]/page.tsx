@@ -87,7 +87,7 @@ export default function TaskPage({ params }: { params: { id: string } }) {
         title: task.title,
         status: task.status,
         priority: task.priority,
-        description: task.description,
+        description: task.description || "",
         clientId: task.clientId,
         client: task.client,
         deadline: task.deadline,

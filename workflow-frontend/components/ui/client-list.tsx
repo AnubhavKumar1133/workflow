@@ -2,16 +2,51 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-export function ClientList({ clients, tasks }) {
-  // Count tasks per client
-  const getClientTaskCounts = (clientName) => {
-    const clientTasks = tasks.filter((task) => task.client === clientName)
-    const total = clientTasks.length
-    const completed = clientTasks.filter((task) => task.status === "completed").length
-    const inProgress = clientTasks.filter((task) => task.status === "in progress").length
-    const pending = clientTasks.filter((task) => task.status === "pending").length
+interface Task {
+  id: number
+  title: string
+  clientId?: number
+  client?: string
+  status: string
+  priority: string
+  deadline?: string
+  description: string
+  createdAt?: string
+}
 
-    return { total, completed, inProgress, pending }
+
+interface Client {
+  id: number
+  name: string
+  email?: string
+  company?: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface TaskCounts {
+  total: number
+  completed: number
+  inProgress: number
+  pending: number
+}
+
+interface ClientListProps {
+  clients: Client[]
+  tasks: Task[]
+}
+
+export function ClientList({ clients, tasks }: ClientListProps) {
+  // Count tasks per client
+  const getClientTaskCounts = (clientName: string): TaskCounts => {
+    const clientTasks = tasks.filter((task) => task.client === clientName)
+    return {
+      total: clientTasks.length,
+      completed: clientTasks.filter((task) => task.status === "completed").length,
+      inProgress: clientTasks.filter((task) => task.status === "in progress").length,
+      pending: clientTasks.filter((task) => task.status === "pending").length
+    }
   }
 
   return (

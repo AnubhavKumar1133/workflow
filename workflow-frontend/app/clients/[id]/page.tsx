@@ -10,10 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ChevronLeft, Pencil, Trash, AlertCircle } from "lucide-react"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { formatDate } from "@/lib/utils"
 import { fetchApi } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-
+import {use} from "react"
 interface Client {
   id: number
   name: string
@@ -24,7 +23,7 @@ interface Client {
   updatedAt: string
 }
 
-export default function ClientPage({ params }: { params: { id: string } }) {
+export default function ClientPage({params}: {params: Promise<{ id: string }>}) {
   const router = useRouter()
   const [client, setClient] = useState<Client | null>(null)
   const [editedClient, setEditedClient] = useState<Client | null>(null)
@@ -33,13 +32,14 @@ export default function ClientPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const { id } = use(params);
 
   useEffect(() => {
     const fetchClient = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const clientData = await fetchApi(`/api/clients/${params.id}`)
+        const clientData = await fetchApi(`/api/clients/${id}`)
         setClient(clientData)
         setEditedClient(clientData)
       } catch (err: any) {
@@ -50,7 +50,7 @@ export default function ClientPage({ params }: { params: { id: string } }) {
     }
 
     fetchClient()
-  }, [params.id])
+  }, [id])
 
   const handleInputChange = (field: keyof Client, value: string) => {
     setEditedClient((prev) => ({

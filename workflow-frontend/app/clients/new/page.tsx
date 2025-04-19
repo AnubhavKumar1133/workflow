@@ -119,7 +119,7 @@ export default function NewClientPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex justify-between mt-4">
               <Button variant="outline" type="button" onClick={() => router.push("/clients")}>
                 Cancel
               </Button>
@@ -128,7 +128,12 @@ export default function NewClientPage() {
               </Button>
             </CardFooter>
           </form>
-        </Card>
+        </Card> 
+        <div className="text-center text-sm  mt-4">
+          <Link href="/dashboard" className="text-blue-500 hover:underline">
+            Go back to Dashboard
+          </Link>
+        </div>
       </main>
     </div>
   )

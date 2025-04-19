@@ -47,6 +47,10 @@ export default function DashboardPage() {
       setError(null)
 
       try {
+        if(!localStorage.getItem("token")){
+          router.push("/login")
+          return
+        }
         const stats = await fetchApi("/api/dashboard/stats",{
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -109,11 +113,19 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
       <main className="flex-1 space-y-4 p-4 md:p-8">
-        <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Title in its own row */}
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <Link href="/tasks/new">
-            <Button>Create New Task</Button>
-          </Link>
+
+          {/* Buttons in a second row (stacked on mobile, horizontal on larger screens) */}
+          <div className="flex gap-2">
+            <Link href="/tasks">
+              <Button>All Tasks</Button>
+            </Link>
+            <Link href="/clients">
+              <Button>All Clients</Button>
+            </Link>
+          </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
