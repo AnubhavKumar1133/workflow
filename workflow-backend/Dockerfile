@@ -20,4 +20,5 @@ RUN npx prisma generate
 EXPOSE 5000
 
 # Run the app
-CMD ["node", "./src/server.js"]
+# CMD ["node", "./src/server.js"]
+CMD sh -c "npx prisma db push && node ./src/server.js"
