@@ -15,7 +15,6 @@ COPY . .
 
 # Now Prisma schema is available
 RUN npx prisma generate
-RUN npx prisma db push
 
 # Expose the app port
 EXPOSE 5000
