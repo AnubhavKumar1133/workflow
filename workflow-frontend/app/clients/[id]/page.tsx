@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,13 +24,8 @@ interface Client {
   updatedAt: string
 }
 
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
-export default async function Page({ params }: PageProps) {
-  const { id } = await params
-
+export default function ClientPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
   const [client, setClient] = useState<Client | null>(null)
   const [editedClient, setEditedClient] = useState<Client | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -44,7 +39,7 @@ export default async function Page({ params }: PageProps) {
       setIsLoading(true)
       setError(null)
       try {
-        const clientData = await fetchApi(`/api/clients/${id}`)
+        const clientData = await fetchApi(`/api/clients/${params.id}`)
         setClient(clientData)
         setEditedClient(clientData)
       } catch (err: any) {
@@ -54,10 +49,8 @@ export default async function Page({ params }: PageProps) {
       }
     }
 
-    if (id) {
-      fetchClient()
-    }
-  }, [id])
+    fetchClient()
+  }, [params.id])
 
   const handleInputChange = (field: keyof Client, value: string) => {
     setEditedClient((prev) => ({
@@ -80,7 +73,7 @@ export default async function Page({ params }: PageProps) {
     setIsSaving(true)
     setError(null)
     try {
-      const updatedClient = await fetchApi(`/api/clients/${client?.id}`, {
+      const updatedClient = await fetchApi(`/api/clients/${params.id}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -107,26 +100,29 @@ export default async function Page({ params }: PageProps) {
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this client?")) {
-      return
+      return;
     }
-
-    setIsDeleting(true)
-    setError(null)
-
+  
+    setIsDeleting(true);
+    setError(null);
+  
     try {
-      await fetchApi(`/api/clients/${client?.id}`, {
-        method: "DELETE"
-      })
-
-      router.push("/clients")
-      router.refresh()
+      await fetchApi(`/api/clients/${params.id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        }
+      });
+      
+      router.push("/clients");
+      router.refresh();
     } catch (err: any) {
-      setError(err.message || "Failed to delete client")
-      console.error("Delete error:", err)
+      setError(err.message || "Failed to delete client");
+      console.error("Delete error:", err);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   if (isLoading) {
     return <div className="p-8 text-center">Loading...</div>
@@ -164,7 +160,9 @@ export default async function Page({ params }: PageProps) {
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-2xl">{client.name}</CardTitle>
-                <CardDescription>Client details</CardDescription>
+                <CardDescription>
+                  Client details • Created {formatDate(client.createdAt)}
+                </CardDescription>
               </div>
               <div className="flex space-x-2">
                 {!isEditing ? (
