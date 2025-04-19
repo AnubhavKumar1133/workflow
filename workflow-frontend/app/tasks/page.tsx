@@ -10,29 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import {
   Select,
   SelectContent,
@@ -50,16 +28,13 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { CalendarIcon, Plus, Search, X } from "lucide-react"
-import { CalendarIcon, Plus, Search, X } from "lucide-react"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { useTasks } from "@/hooks/useTasks"
 import { useTasks } from "@/hooks/useTasks"
 import { formatDate } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-  DialogTitle
 } from "@/components/ui/dialog"
 
 type Priority = "high" | "medium" | "low"
@@ -71,7 +46,6 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [sortBy, setSortBy] = useState("deadline")
   const [sortOrder, setSortOrder] = useState("asc")
-  const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   const toggleSortOrder = () => {
@@ -165,69 +139,16 @@ export default function TasksPage() {
                     <DialogTrigger asChild>
                       <Button variant="outline" className="w-full mb-2">Filter</Button>
                     </DialogTrigger>
-                    <DialogTitle>Filter Tasks</DialogTitle>
                     <DialogContent className="space-y-4 p-6">
                       <div className="flex justify-between items-center">
                         <h2 className="text-lg font-semibold">Filters</h2>
-                        
-                      </div>
-                      <Input
-                        placeholder="Search tasks..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                      <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Statuses</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="in progress">In Progress</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Filter by priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Priorities</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="low">Low</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select value={sortBy} onValueChange={setSortBy}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="deadline">Deadline</SelectItem>
-                          <SelectItem value="priority">Priority</SelectItem>
-                          <SelectItem value="title">Title</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="outline" onClick={toggleSortOrder}>
-                        Sort: {sortOrder === "asc" ? "↑ Ascending" : "↓ Descending"}
-                      </Button>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-
-                {/* Filters for desktop */}
-                <div className="hidden md:flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
-                {/* Filters for small devices */}
-                <div className="md:hidden">
-                  <Dialog open={showMobileFilters} onOpenChange={setShowMobileFilters}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full mb-2">Filter</Button>
-                    </DialogTrigger>
-                    <DialogTitle>Filter Tasks</DialogTitle>
-                    <DialogContent className="space-y-4 p-6">
-                      <div className="flex justify-between items-center">
-                        <h2 className="text-lg font-semibold">Filters</h2>
-                        
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowMobileFilters(false)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                       <Input
                         placeholder="Search tasks..."
@@ -375,16 +296,6 @@ export default function TasksPage() {
             )}
           </CardContent>
         </Card>
-        <div className="text-center text-sm  mt-4">
-          <Link href="/dashboard" className="text-blue-500 hover:underline">
-            Go back to Dashboard
-          </Link>
-        </div>
-        <div className="text-center text-sm  mt-4">
-          <Link href="/dashboard" className="text-blue-500 hover:underline">
-            Go back to Dashboard
-          </Link>
-        </div>
       </main>
     </div>
   )
