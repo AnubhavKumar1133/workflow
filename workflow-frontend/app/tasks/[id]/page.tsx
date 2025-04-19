@@ -25,7 +25,7 @@ interface Task {
   status: string
   priority: string
   deadline?: string
-  description: string
+  description?: string
   createdAt?: string
 }
 
