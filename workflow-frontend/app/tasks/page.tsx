@@ -57,7 +57,7 @@ export default function TasksPage() {
     .filter((task) => {
       const matchesSearch =
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (task.description ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.client?.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesStatus = statusFilter === "all" || task.status === statusFilter
