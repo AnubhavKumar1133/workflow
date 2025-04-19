@@ -1,131 +1,94 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ChevronLeft, Pencil, Trash, AlertCircle } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CheckCircle, Clock, ListTodo, Users } from "lucide-react"
+import { TaskList } from "@/components/task-list"
+import { TaskStats } from "@/components/task-stats"
+import { ClientList } from "@/components/client-list"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { formatDate } from "@/lib/utils"
 import { fetchApi } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import router from "next/router"
 
-interface Client {
-  id: number
-  name: string
-  email?: string
-  company?: string
-  notes?: string
-  createdAt: string
-  updatedAt: string
-}
+export default function DashboardPage() {
+  interface DashboardData {
+    taskStats: {
+      total: number
+      pending: number
+      inProgress: number
+      completed: number
+    }
+    priorityStats: {
+      high: number
+      medium: number
+      low: number
+    }
+    clientStats: {
+      total: number
+      withActiveTasks: number
+    }
+  }
 
-export default function ClientPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [client, setClient] = useState<Client | null>(null)
-  const [editedClient, setEditedClient] = useState<Client | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [upcomingTasks, setUpcomingTasks] = useState([])
+  const [clients, setClients] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
+  // Fetch dashboard data
   useEffect(() => {
-    const fetchClient = async () => {
+    const fetchDashboardData = async () => {
       setIsLoading(true)
       setError(null)
+
       try {
-        const clientData = await fetchApi(`/api/clients/${params.id}`)
-        setClient(clientData)
-        setEditedClient(clientData)
+        if(!localStorage.getItem("token")){
+          router.push("/login")
+          return
+        }
+        const stats = await fetchApi("/api/dashboard/stats",{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          }
+        })
+        setDashboardData({
+          ...stats,
+          priorityStats: {
+            high: stats.priorityStats.high || 0,
+            medium: stats.priorityStats.medium || 0,
+            low: stats.priorityStats.low || 0,
+          },
+        })
+       
+        // setDashboardData(stats)
+        console.log("Dashboard stats:", stats)
+        // Fetch upcoming deadlines
+        const upcoming = await fetchApi("/api/dashboard/upcoming")
+        console.log("Upcoming tasks:", upcoming)
+        setUpcomingTasks(upcoming)
+
+        // Fetch clients
+        const clientsData = await fetchApi("/api/clients")
+        setClients(clientsData)
+        
+        setIsLoading(false)
       } catch (err: any) {
-        setError(err.message || "Failed to load client")
-      } finally {
+        setError(err.message || "Failed to load dashboard data")
         setIsLoading(false)
       }
     }
 
-    fetchClient()
-  }, [params.id])
-
-  const handleInputChange = (field: keyof Client, value: string) => {
-    setEditedClient((prev) => ({
-      ...(prev || {
-        id: client?.id || 0,
-        name: client?.name || "",
-        email: client?.email || "",
-        company: client?.company || "",
-        notes: client?.notes || "",
-        createdAt: client?.createdAt || new Date().toISOString(),
-        updatedAt: client?.updatedAt || new Date().toISOString()
-      }),
-      [field]: value,
-    }))
-  }
-
-  const handleSave = async () => {
-    if (!editedClient) return
-
-    setIsSaving(true)
-    setError(null)
-    try {
-      const updatedClient = await fetchApi(`/api/clients/${params.id}`, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: editedClient.name,
-          email: editedClient.email,
-          company: editedClient.company,
-          notes: editedClient.notes
-        }),
-      })
-
-      setClient(updatedClient)
-      setEditedClient(updatedClient)
-      setIsEditing(false)
-      router.push('/clients')
-    } catch (err: any) {
-      setError(err.message || "Failed to update client")
-    } finally {
-      setIsSaving(false)
-    } 
-  }
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this client?")) {
-      return;
-    }
-  
-    setIsDeleting(true);
-    setError(null);
-  
-    try {
-      await fetchApi(`/api/clients/${params.id}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        }
-      });
-      
-      router.push("/clients");
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Failed to delete client");
-      console.error("Delete error:", err);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+    fetchDashboardData()
+  }, [])
 
   if (isLoading) {
-    return <div className="p-8 text-center">Loading...</div>
+    return <div className="p-8 text-center">Loading dashboard data...</div>
   }
 
   if (error) {
@@ -139,124 +102,113 @@ export default function ClientPage({ params }: { params: { id: string } }) {
     )
   }
 
-  if (!client) {
-    return <div className="p-8 text-center">Client not found</div>
+  if (!dashboardData) {
+    return <div className="p-8 text-center">No dashboard data available</div>
   }
 
+  const { taskStats, priorityStats, clientStats } = dashboardData
+  console.log(taskStats.total)
+  console.log(taskStats.completed)
   return (
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
       <main className="flex-1 space-y-4 p-4 md:p-8">
-        <div className="flex items-center">
-          <Link href="/clients">
-            <Button variant="ghost" size="sm" className="gap-1">
-              <ChevronLeft className="h-4 w-4" />
-              Back to Clients
-            </Button>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <Link href="/tasks/new">
+            <Button>Create New Task</Button>
           </Link>
         </div>
-        <Card className="max-w-3xl mx-auto">
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-2xl">{client.name}</CardTitle>
-                <CardDescription>
-                  Client details • Created {formatDate(client.createdAt)}
-                </CardDescription>
-              </div>
-              <div className="flex space-x-2">
-                {!isEditing ? (
-                  <>
-                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                      <Pencil className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
-                      <Trash className="h-4 w-4 mr-1" />
-                      {isDeleting ? "Deleting..." : "Delete"}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                      {isSaving ? "Saving..." : "Save Changes"}
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!isEditing ? (
-              <>
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Company</h3>
-                    <div>{client.company || "Not specified"}</div>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Email</h3>
-                    <div>{client.email || "Not specified"}</div>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Notes</h3>
-                  <div className="text-sm whitespace-pre-line rounded-md bg-muted p-4">
-                    {client.notes || "No notes available"}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={editedClient?.name || ""}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="company">Company</Label>
-                    <Input
-                      id="company"
-                      value={editedClient?.company || ""}
-                      onChange={(e) => handleInputChange("company", e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={editedClient?.email || ""}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={editedClient?.notes || ""}
-                    onChange={(e) => handleInputChange("notes", e.target.value)}
-                    rows={5}
-                  />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+              <ListTodo className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{taskStats.total}</div>
+              <p className="text-xs text-muted-foreground">
+                {taskStats.pending} pending, {taskStats.inProgress} in progress
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{taskStats.completed}</div>
+              <p className="text-xs text-muted-foreground">
+                {taskStats.total > 0
+                  ? `${Math.round((taskStats.completed / taskStats.total) * 100)}% completion rate`
+                  : "0% completion rate"}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">High Priority</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{priorityStats.high}</div>
+              <p className="text-xs text-muted-foreground">
+                {priorityStats.high - (taskStats.completed || 0)} still open
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{clientStats.total}</div>
+              <p className="text-xs text-muted-foreground">{clientStats.withActiveTasks} with active projects</p>
+            </CardContent>
+          </Card>
+        </div>
+        <Tabs defaultValue="upcoming" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="upcoming">Upcoming Deadlines</TabsTrigger>
+            <TabsTrigger value="stats">Task Statistics</TabsTrigger>
+            <TabsTrigger value="clients">Clients</TabsTrigger>
+          </TabsList>
+          <TabsContent value="upcoming" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Deadlines</CardTitle>
+                <CardDescription>Your tasks with the closest deadlines that need attention.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TaskList tasks={upcomingTasks} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="stats" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Task Statistics</CardTitle>
+                <CardDescription>Overview of your task distribution by status and priority.</CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <TaskStats taskStats={taskStats} priorityStats={priorityStats} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="clients" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Client Overview</CardTitle>
+                <CardDescription>All your clients and their associated tasks.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ClientList clients={clients} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   )
