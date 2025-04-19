@@ -113,8 +113,11 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
       <main className="flex-1 space-y-4 p-4 md:p-8">
-        <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Title in its own row */}
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+
+          {/* Buttons in a second row (stacked on mobile, horizontal on larger screens) */}
           <div className="flex gap-2">
             <Link href="/tasks/new">
               <Button>Create New Task</Button>
