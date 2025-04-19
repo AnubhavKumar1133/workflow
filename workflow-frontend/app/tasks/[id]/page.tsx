@@ -16,7 +16,7 @@ import { formatDate } from "@/lib/utils"
 import { fetchApi } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { API_BASE_URL } from "@/lib/config"
-import {use} from 'react';
+
 interface Task {
   id: number
   title: string
@@ -25,11 +25,11 @@ interface Task {
   status: string
   priority: string
   deadline?: string
-  description?: string
+  description: string
   createdAt?: string
 }
 
-export default function TaskPage({params}: {params: Promise<{ id: string }>}) {
+export default function TaskPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [task, setTask] = useState<Task | null>(null)
   const [editedTask, setEditedTask] = useState<Task | null>(null)
@@ -38,14 +38,13 @@ export default function TaskPage({params}: {params: Promise<{ id: string }>}) {
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { id } = use(params);
 
   useEffect(() => {
     const fetchTask = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const taskData = await fetchApi(`/api/tasks/${id}`)
+        const taskData = await fetchApi(`/api/tasks/${params.id}`)
         if(!taskData){
           router.push("/login")
         }
@@ -60,7 +59,7 @@ export default function TaskPage({params}: {params: Promise<{ id: string }>}) {
     }
 
     fetchTask()
-  }, [id])
+  }, [params.id])
 
   if (isLoading) {
     return <div className="p-8 text-center">Loading...</div>
@@ -88,7 +87,7 @@ export default function TaskPage({params}: {params: Promise<{ id: string }>}) {
         title: task.title,
         status: task.status,
         priority: task.priority,
-        description: task.description,
+        description: task.description || "",
         clientId: task.clientId,
         client: task.client,
         deadline: task.deadline,
