@@ -4,21 +4,20 @@ FROM node:22-alpine
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY package*.json .
+# Copy package files first (for layer caching)
+COPY package*.json ./
 
-# Install the dependencies
+# Install dependencies
 RUN npm install
 
-
-# Run Prisma client generation
-RUN npx prisma generate
-
-# Copy the rest of the application code into the container at /app
+# 🔄 Copy the entire app now (this brings in your prisma folder too)
 COPY . .
 
-# Expose port that the app runs on
+# ✅ Now Prisma schema is available
+RUN npx prisma generate
+
+# Expose the app port
 EXPOSE 5000
 
-# Define the command to run the application
+# Run the app
 CMD ["node", "./src/server.js"]
