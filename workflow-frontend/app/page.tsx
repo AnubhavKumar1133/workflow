@@ -1,10 +1,54 @@
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 
 export default function Home() {
+  const router = useRouter()
+
+  useEffect(() => {
+    const token = localStorage.getItem("token") // or check cookies
+    if (token) {
+      router.prefetch("/dashboard")
+    } else {
+      router.prefetch("/login")
+    }
+  }, [])
+
+  const handleGetStarted = () => {
+    const token = localStorage.getItem("token")
+  
+    if (!token) {
+      router.push("/login")
+      return
+    }
+  
+    // Optionally: validate token structure if needed
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      const exp = payload.exp * 1000
+      if (Date.now() > exp) {
+        // Token expired
+        localStorage.removeItem("token")
+        router.push("/login")
+        return
+      }
+  
+      router.push("/dashboard")
+    } catch (error) {
+      // Invalid token format or decoding error
+      localStorage.removeItem("token")
+      router.push("/login")
+    }
+  }
+  
+
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Header and Hero (same as before) */}
       <header className="px-4 lg:px-6 h-16 flex items-center">
         <Link className="flex items-center justify-center" href="/">
           <span className="font-bold text-xl">Workflow</span>
@@ -21,6 +65,7 @@ export default function Home() {
           </Link>
         </nav>
       </header>
+
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
           <div className="container px-4 md:px-6">
@@ -34,17 +79,16 @@ export default function Home() {
                 </p>
               </div>
               <div className="space-x-4">
-                <Link href="/dashboard">
-                  <Button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                <Button onClick={handleGetStarted} className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
         </section>
       </main>
+
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500 dark:text-gray-400">©This Website was built by ©Anubhav Kumar</p> 
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
